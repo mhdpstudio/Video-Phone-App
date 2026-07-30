@@ -5,6 +5,7 @@ import '../models/home_data.dart';
 import '../models/video.dart';
 import '../repositories/video_repository.dart';
 import '../widgets/category_row.dart';
+import '../widgets/featured_section.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -15,6 +16,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late Future<HomeData> futureHome;
+
 
   @override
   void initState() {
@@ -36,26 +38,25 @@ class _HomePageState extends State<HomePage> {
       future: futureHome,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return const Center(child: CircularProgressIndicator());
         }
 
         if (snapshot.hasError) {
-          return Center(
-            child: Text(snapshot.error.toString()),
-          );
+          return Center(child: Text(snapshot.error.toString()));
         }
 
         final home = snapshot.data!;
 
         final List<Video> videos = home.videos;
+
+        final featuredVideos = home.featured
+            .map((id) => videos.firstWhere((v) => v.id == id))
+            .toList();
+
         final List<Category> categories = home.categories;
 
         if (videos.isEmpty) {
-          return const Center(
-            child: Text("No Videos"),
-          );
+          return const Center(child: Text("No Videos"));
         }
 
         /// ترتيب الفيديوهات حسب التاريخ والوقت (الأحدث أولاً)
@@ -78,27 +79,27 @@ class _HomePageState extends State<HomePage> {
 
         return RefreshIndicator(
           onRefresh: refresh,
-          child: ListView.builder(
+          child: ListView(
             physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.only(
-              top: 90, // <--- تعديل: مساحة كافية للـ TopBar عشان ما يغطيش أول Category
-              bottom: 100, // <--- تعديل: مساحة كافية للـ BottomBar العائم
-            ),
-            itemCount: categories.length,
-            itemBuilder: (context, index) {
-              final category = categories[index];
-              final categoryVideos = grouped[category.id] ?? [];
+            padding: const EdgeInsets.only(top: 90, bottom: 100),
+            children: [
+              FeaturedSection(videos: featuredVideos),
 
-              // تعديل: لو القسم ما فيهوش فيديوهات أو اسم القسم فاضي ما يرسمش مساحة فاضية
-              if (categoryVideos.isEmpty || category.title.isEmpty) {
-                return const SizedBox.shrink();
-              }
+              const SizedBox(height: 25),
 
-              return CategoryRow(
-                title: category.title,
-                videos: categoryVideos,
-              );
-            },
+              ...categories.map((category) {
+                final categoryVideos = grouped[category.id] ?? [];
+
+                if (categoryVideos.isEmpty || category.title.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+
+                return CategoryRow(
+                  title: category.title,
+                  videos: categoryVideos,
+                );
+              }),
+            ],
           ),
         );
       },

@@ -96,9 +96,9 @@ class Video {
 
   /// رابط البنر
   String get bannerUrl =>
-      "https://raw.githubusercontent.com/mhdpstudio/Vexora/main/pics/Banners/$thumbnail.webp";
+      "https://raw.githubusercontent.com/mhdpstudio/Vexora/main/pics/Banners/$thumbnail" + "-bg.webp";
 
   /// رابط أول حلقة
   String get firstEpisode =>
-      "https://pub-40783bb5bc614f659f2f6edff9ff95ea.r2.dev/$videoFolder/1.$videoExtension";
+      "https://pub-e90ceed29c284bf3a7032502a3322a6c.r2.dev/${videoFolder}1.$videoExtension";
 }

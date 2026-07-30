@@ -23,9 +23,8 @@ class BottomBar extends StatelessWidget {
     const items = [
       _BottomItem(Icons.home_rounded),
       _BottomItem(Icons.search_rounded),
-      _BottomItem(Icons.favorite_rounded),
+      _BottomItem(Icons.bookmark_rounded),
       _BottomItem(Icons.schedule_rounded),
-      _BottomItem(Icons.person_rounded),
     ];
 
     return SafeArea(
