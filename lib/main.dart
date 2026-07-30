@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Movies App',
+      title: 'Vexora',
       
       // 1. تطبيق سلوك السكرول الناعم على مستوى التطبيق بالكامل
       scrollBehavior: SmoothScrollBehavior(),

@@ -40,7 +40,7 @@ class TopBar extends StatelessWidget {
                       scale:
                           1.4, // يكبر اللوجو بنسبة 40% بدون ما يزود ارتفاع الـ TopBar
                       child: Image.asset(
-                        "assets/images/text.png",
+                        "assets/images/row.png",
                         height: 128,
                         fit: BoxFit.contain,
                       ),
