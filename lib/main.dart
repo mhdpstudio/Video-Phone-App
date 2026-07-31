@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart'; // 1. استيراد المكتبة
 import 'theme/app_colors.dart';
 import 'widgets/main_layout.dart';
 
@@ -33,7 +34,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Vexora',
-      
+
       // 1. تطبيق سلوك السكرول الناعم على مستوى التطبيق بالكامل
       scrollBehavior: SmoothScrollBehavior(),
 
@@ -46,8 +47,10 @@ class MyApp extends StatelessWidget {
           surface: AppColors.background,
           primary: AppColors.primary,
         ),
+
+        textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme),
       ),
-      
+
       home: const MainLayout(),
     );
   }

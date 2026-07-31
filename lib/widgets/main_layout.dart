@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 
+import '../layout/app_page.dart';
+
 import 'components/top_bar.dart';
 import 'components/bottom_bar.dart';
 
 import '../pages/home_page.dart';
+import '../pages/bookmark_page.dart';
 // import '../pages/search_page.dart';
-// import '../pages/favorites_page.dart';
 // import '../pages/continue_page.dart';
 // import '../pages/profile_page.dart';
 
@@ -19,70 +21,69 @@ class MainLayout extends StatefulWidget {
 }
 
 class _MainLayoutState extends State<MainLayout> {
-  int currentIndex = 0;
+  AppPage currentPage = AppPage.home;
 
-  late final List<Widget> pages;
+  late final Map<AppPage, Widget> pages;
 
   @override
   void initState() {
     super.initState();
 
-    pages = const [
-      HomePage(),
-      // SearchPage(),
-      // FavoritesPage(),
-      // ContinuePage(),
-      // ProfilePage(),
-    ];
+    pages = {
+      AppPage.home: const HomePage(),
+
+      // AppPage.search: const SearchPage(),
+
+      AppPage.bookmark: const BookmarkPage(),
+
+      // AppPage.continueWatching: const ContinuePage(),
+
+      // AppPage.profile: const ProfilePage(),
+    };
   }
 
-  void changePage(int index) {
-    if (index == currentIndex) return;
+  void changePage(AppPage page) {
+    if (page == currentPage) return;
 
-    // التأكد من عدم الانتقال لإندكس غير موجود حالياً في القائمة المعلقة (Commented)
-    if (index >= pages.length) return;
+    // لو الصفحة لسه مش موجودة متتنقلش ليها
+    if (!pages.containsKey(page)) return;
 
     setState(() {
-      currentIndex = index;
+      currentPage = page;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // السطر السحري لحذف خلفية الـ BottomBar وجعله عائماً بحواف شفافة
       extendBody: true,
       backgroundColor: AppColors.background,
 
       body: Stack(
         children: [
-          /// Current Page View (يمتد خلف الشريط العلوي والسفلي)
           Positioned.fill(
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 250),
-              child: IndexedStack(
-                key: ValueKey(currentIndex),
-                index: currentIndex,
-                children: pages,
+              child: KeyedSubtree(
+                key: ValueKey(currentPage),
+                child: pages[currentPage]!,
               ),
             ),
           ),
 
-          /// Top Bar Floating
           Positioned(
             top: 0,
             left: 0,
             right: 0,
             child: TopBar(
-              onSearchPressed: () => changePage(1),
+              onSearchPressed: () => changePage(AppPage.search),
             ),
           ),
         ],
       ),
 
-      /// Floating Bottom Navigation Bar
       bottomNavigationBar: BottomBar(
-        currentIndex: currentIndex,
+        currentPage: currentPage,
         onChanged: changePage,
       ),
     );

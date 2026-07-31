@@ -4,8 +4,12 @@ import '../models/category.dart';
 import '../models/home_data.dart';
 import '../models/video.dart';
 import '../repositories/video_repository.dart';
+
+import '../services/bookmark_service.dart';
+
 import '../widgets/category_row.dart';
 import '../widgets/featured_section.dart';
+import '../widgets/recently_added.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -17,6 +21,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late Future<HomeData> futureHome;
 
+  bool _loadedBookmarks = false;
 
   @override
   void initState() {
@@ -38,17 +43,36 @@ class _HomePageState extends State<HomePage> {
       future: futureHome,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
         }
 
         if (snapshot.hasError) {
-          return Center(child: Text(snapshot.error.toString()));
+          return Center(
+            child: Text(snapshot.error.toString()),
+          );
         }
 
         final home = snapshot.data!;
 
-        final List<Video> videos = home.videos;
+        final List<Video> videos = List.from(home.videos);
 
+        /// ترتيب الفيديوهات (الأحدث أولاً)
+        videos.sort((a, b) {
+          final da = DateTime.parse("${a.date} ${a.time}");
+          final db = DateTime.parse("${b.date} ${b.time}");
+
+          return db.compareTo(da);
+        });
+
+        /// تحميل الـ Bookmarks مرة واحدة فقط
+        if (!_loadedBookmarks) {
+          _loadedBookmarks = true;
+          BookmarkService.instance.load(videos);
+        }
+
+        /// Featured
         final featuredVideos = home.featured
             .map((id) => videos.firstWhere((v) => v.id == id))
             .toList();
@@ -56,16 +80,10 @@ class _HomePageState extends State<HomePage> {
         final List<Category> categories = home.categories;
 
         if (videos.isEmpty) {
-          return const Center(child: Text("No Videos"));
+          return const Center(
+            child: Text("No Videos"),
+          );
         }
-
-        /// ترتيب الفيديوهات حسب التاريخ والوقت (الأحدث أولاً)
-        videos.sort((a, b) {
-          final da = DateTime.parse("${a.date} ${a.time}");
-          final db = DateTime.parse("${b.date} ${b.time}");
-
-          return db.compareTo(da);
-        });
 
         /// تقسيم حسب الكاتيجوري
         final Map<String, List<Video>> grouped = {};
@@ -81,12 +99,26 @@ class _HomePageState extends State<HomePage> {
           onRefresh: refresh,
           child: ListView(
             physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.only(top: 90, bottom: 100),
+            padding: const EdgeInsets.only(
+              top: 90,
+              bottom: 100,
+            ),
             children: [
-              FeaturedSection(videos: featuredVideos),
+              /// Featured
+              FeaturedSection(
+                videos: featuredVideos,
+              ),
 
-              const SizedBox(height: 25),
+              const SizedBox(height: 35),
 
+              /// Recently Added
+              RecentlyAddedSection(
+                videos: videos,
+              ),
+
+              const SizedBox(height: 35),
+
+              /// Categories
               ...categories.map((category) {
                 final categoryVideos = grouped[category.id] ?? [];
 

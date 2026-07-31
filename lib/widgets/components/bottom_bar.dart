@@ -1,7 +1,7 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+import '../../layout/app_page.dart';
 
 import '../../theme/app_animation.dart';
 import '../../theme/app_colors.dart';
@@ -9,23 +9,39 @@ import '../../theme/app_decoration.dart';
 import '../../theme/app_sizes.dart';
 
 class BottomBar extends StatelessWidget {
-  final int currentIndex;
-  final ValueChanged<int> onChanged;
+  final AppPage currentPage;
+  final ValueChanged<AppPage> onChanged;
 
   const BottomBar({
     super.key,
-    required this.currentIndex,
+    required this.currentPage,
     required this.onChanged,
   });
 
   @override
   Widget build(BuildContext context) {
     const items = [
-      _BottomItem(Icons.home_rounded),
-      _BottomItem(Icons.search_rounded),
-      _BottomItem(Icons.bookmark_rounded),
-      _BottomItem(Icons.schedule_rounded),
+      _BottomItem(
+        icon: Icons.home_rounded,
+        page: AppPage.home,
+      ),
+      _BottomItem(
+        icon: Icons.bookmark_rounded,
+        page: AppPage.bookmark,
+      ),
+      _BottomItem(
+        icon: Icons.search_rounded,
+        page: AppPage.search,
+      ),
+      _BottomItem(
+        icon: Icons.movie_creation,
+        page: AppPage.continueWatching,
+      ),
     ];
+
+    final currentIndex = items.indexWhere(
+      (e) => e.page == currentPage,
+    );
 
     return SafeArea(
       child: Padding(
@@ -37,7 +53,6 @@ class BottomBar extends StatelessWidget {
             return Container(
               height: AppSizes.navbarHeight,
               decoration: BoxDecoration(
-                // لون الـ Floating Bar فقط (وليس المنطقة الشاملة وراءه)
                 color: AppColors.bottomBarBackground,
                 borderRadius: BorderRadius.circular(AppSizes.radiusXL),
                 border: Border.all(
@@ -55,26 +70,26 @@ class BottomBar extends StatelessWidget {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  /// Animated Indicator
                   _AnimatedIndicator(
                     itemWidth: itemWidth,
                     index: currentIndex,
                   ),
 
-                  /// Icons
                   Row(
-                    children: List.generate(items.length, (index) {
+                    children: items.map((item) {
+                      final selected = item.page == currentPage;
+
                       return Expanded(
                         child: _NavButton(
-                          item: items[index],
-                          selected: currentIndex == index,
+                          item: item,
+                          selected: selected,
                           onTap: () {
                             HapticFeedback.lightImpact();
-                            onChanged(index);
+                            onChanged(item.page);
                           },
                         ),
                       );
-                    }),
+                    }).toList(),
                   ),
                 ],
               ),
@@ -174,6 +189,10 @@ class _NavButton extends StatelessWidget {
 
 class _BottomItem {
   final IconData icon;
+  final AppPage page;
 
-  const _BottomItem(this.icon);
+  const _BottomItem({
+    required this.icon,
+    required this.page,
+  });
 }
