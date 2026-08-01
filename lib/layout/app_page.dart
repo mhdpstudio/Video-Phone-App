@@ -4,4 +4,5 @@ enum AppPage {
   bookmark,
   continueWatching,
   profile,
+  settings
 }

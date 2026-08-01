@@ -28,8 +28,8 @@ class AppSizes {
   static const double iconXL = 34;
 
   // Navbar
-  static const double navbarHeight = 68;
-  static const double navbarBottom = 18;
+  static const double navbarHeight = 60;
+  static const double navbarBottom = 10;
 
   // TopBar
   static const double topBarHeight = 70;

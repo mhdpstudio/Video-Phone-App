@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
-
 import '../layout/app_page.dart';
 
 import 'components/top_bar.dart';
@@ -9,12 +8,14 @@ import 'components/bottom_bar.dart';
 
 import '../pages/home_page.dart';
 import '../pages/bookmark_page.dart';
-// import '../pages/search_page.dart';
+import '../pages/search_page.dart';
 // import '../pages/continue_page.dart';
 // import '../pages/profile_page.dart';
 
 class MainLayout extends StatefulWidget {
-  const MainLayout({super.key});
+  const MainLayout({
+    super.key,
+  });
 
   @override
   State<MainLayout> createState() => _MainLayoutState();
@@ -30,40 +31,75 @@ class _MainLayoutState extends State<MainLayout> {
     super.initState();
 
     pages = {
+      /// =========================
+      /// Home
+      /// =========================
       AppPage.home: const HomePage(),
 
-      // AppPage.search: const SearchPage(),
+      /// =========================
+      /// Search
+      /// =========================
+      AppPage.search: const SearchPage(),
 
+      /// =========================
+      /// Bookmarks
+      /// =========================
       AppPage.bookmark: const BookmarkPage(),
 
+      // /// =========================
+      // /// Continue Watching
+      // /// =========================
       // AppPage.continueWatching: const ContinuePage(),
 
+      // /// =========================
+      // /// Profile / Settings
+      // /// =========================
       // AppPage.profile: const ProfilePage(),
     };
   }
 
-  void changePage(AppPage page) {
-    if (page == currentPage) return;
+  /// ============================================================
+  /// Change Page
+  /// ============================================================
 
-    // لو الصفحة لسه مش موجودة متتنقلش ليها
-    if (!pages.containsKey(page)) return;
+  void changePage(AppPage page) {
+    if (page == currentPage) {
+      return;
+    }
+
+    if (!pages.containsKey(page)) {
+      return;
+    }
 
     setState(() {
       currentPage = page;
     });
   }
 
+  /// ============================================================
+  /// Build
+  /// ============================================================
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
+
       backgroundColor: AppColors.background,
 
       body: Stack(
         children: [
+          /// ======================================================
+          /// Current Page
+          /// ======================================================
+
           Positioned.fill(
             child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 250),
+              duration: const Duration(
+                milliseconds: 250,
+              ),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
               child: KeyedSubtree(
                 key: ValueKey(currentPage),
                 child: pages[currentPage]!,
@@ -71,19 +107,38 @@ class _MainLayoutState extends State<MainLayout> {
             ),
           ),
 
+          /// ======================================================
+          /// Top Bar
+          /// ======================================================
+
           Positioned(
             top: 0,
             left: 0,
             right: 0,
             child: TopBar(
-              onSearchPressed: () => changePage(AppPage.search),
+              currentPage: currentPage,
+
+              /// Search من الـ TopBar
+              onSearchPressed: () {
+                changePage(AppPage.search);
+              },
+
+              /// Notifications
+              onNotificationPressed: () {
+                // TODO: Notifications
+              },
             ),
           ),
         ],
       ),
 
+      /// ==========================================================
+      /// Bottom Navigation
+      /// ==========================================================
+
       bottomNavigationBar: BottomBar(
         currentPage: currentPage,
+
         onChanged: changePage,
       ),
     );

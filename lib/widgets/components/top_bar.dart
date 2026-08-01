@@ -1,29 +1,43 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
+import '../../layout/app_page.dart';
 import '../../theme/app_animation.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_sizes.dart';
 
 class TopBar extends StatelessWidget {
+  final AppPage currentPage;
   final VoidCallback? onSearchPressed;
   final VoidCallback? onNotificationPressed;
 
-  const TopBar({super.key, this.onSearchPressed, this.onNotificationPressed});
+  const TopBar({
+    super.key,
+    required this.currentPage,
+    this.onSearchPressed,
+    this.onNotificationPressed,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final searchActive = currentPage == AppPage.search;
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.topBarBackground.withOpacity(0.85),
-        border: Border(bottom: BorderSide(color: AppColors.border, width: 1)),
+        border: Border(
+          bottom: BorderSide(
+            color: AppColors.border,
+            width: 1,
+          ),
+        ),
       ),
       child: ClipRRect(
         child: BackdropFilter(
           filter: ImageFilter.blur(
             sigmaX: 12,
             sigmaY: 12,
-          ), // تأثير الضباب الزجاجي
+          ),
           child: SafeArea(
             bottom: false,
             child: Container(
@@ -37,8 +51,7 @@ class TopBar extends StatelessWidget {
                   Hero(
                     tag: "logo",
                     child: Transform.scale(
-                      scale:
-                          1.4, // يكبر اللوجو بنسبة 40% بدون ما يزود ارتفاع الـ TopBar
+                      scale: 1.4,
                       child: Image.asset(
                         "assets/images/row.png",
                         height: 128,
@@ -49,13 +62,14 @@ class TopBar extends StatelessWidget {
 
                   const Spacer(),
 
-                  /// Action Buttons Section
+                  /// Action Buttons
                   Row(
                     children: [
                       _ActionButton(
                         icon: Icons.search_rounded,
                         onTap: onSearchPressed,
                         tooltip: "Search",
+                        active: searchActive,
                       ),
 
                       const SizedBox(width: 8),
@@ -64,8 +78,7 @@ class TopBar extends StatelessWidget {
                         icon: Icons.notifications_none_rounded,
                         onTap: onNotificationPressed,
                         tooltip: "Notifications",
-                        showBadge:
-                            true, // نقطة إشعار متناسقة مع لون الـ primary
+                        showBadge: true,
                       ),
                     ],
                   ),
@@ -84,12 +97,14 @@ class _ActionButton extends StatefulWidget {
   final VoidCallback? onTap;
   final String? tooltip;
   final bool showBadge;
+  final bool active;
 
   const _ActionButton({
     required this.icon,
     this.onTap,
     this.tooltip,
     this.showBadge = false,
+    this.active = false,
   });
 
   @override
@@ -101,6 +116,8 @@ class _ActionButtonState extends State<_ActionButton> {
 
   @override
   Widget build(BuildContext context) {
+    final highlighted = hover || widget.active;
+
     final buttonContent = MouseRegion(
       onEnter: (_) => setState(() => hover = true),
       onExit: (_) => setState(() => hover = false),
@@ -109,17 +126,17 @@ class _ActionButtonState extends State<_ActionButton> {
         width: 42,
         height: 42,
         decoration: BoxDecoration(
-          color: hover
-              ? AppColors.cardHover
+          color: highlighted
+              ? AppColors.primary.withOpacity(0.16)
               : AppColors.surface.withOpacity(0.5),
           shape: BoxShape.circle,
           border: Border.all(
-            color: hover
+            color: highlighted
                 ? AppColors.primary.withOpacity(0.5)
                 : AppColors.border,
             width: 1,
           ),
-          boxShadow: hover
+          boxShadow: highlighted
               ? [
                   BoxShadow(
                     color: AppColors.primaryGlow.withOpacity(0.2),
@@ -132,18 +149,21 @@ class _ActionButtonState extends State<_ActionButton> {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+            borderRadius: BorderRadius.circular(
+              AppSizes.radiusFull,
+            ),
             onTap: widget.onTap,
             child: Stack(
               alignment: Alignment.center,
               children: [
                 Icon(
                   widget.icon,
-                  color: hover ? AppColors.primary : AppColors.icon,
+                  color: highlighted
+                      ? AppColors.primary
+                      : AppColors.icon,
                   size: AppSizes.iconMD,
                 ),
 
-                /// Notification Dot Badge (إن وُجدت)
                 if (widget.showBadge)
                   Positioned(
                     top: 10,
@@ -171,7 +191,10 @@ class _ActionButtonState extends State<_ActionButton> {
     );
 
     if (widget.tooltip != null) {
-      return Tooltip(message: widget.tooltip!, child: buttonContent);
+      return Tooltip(
+        message: widget.tooltip!,
+        child: buttonContent,
+      );
     }
 
     return buttonContent;
